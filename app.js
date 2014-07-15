@@ -280,8 +280,31 @@ var appendTicket = function (req, res, next) {
   });
 };
 
+/**
+ * Register quickstart routes as an alias to index `/`
+ * So that the tutorial navigator gets to load
+ */
+
+var quickstartRoutes = require('./lib/quickstart-routes');
+
+app.get('/quickstart', alias('/'))
+quickstartRoutes.forEach(function(r) {
+  app.get('/quickstart' + r, alias('/'));
+});
+
+function alias(route) {
+  return function(req, res, next) {
+    req.url = route;
+    next();
+  }
+}
+
 var includes = require('./lib/includes/includes');
 includes.init(path.join(__dirname, '/docs/includes'));
+
+/**
+ * Create and boot DocsApp as `Markdocs` app
+ */
 
 var docsapp = new markdocs.App(__dirname, '', app);
 docsapp.addPreRender(defaultValues);
@@ -316,6 +339,10 @@ require('./lib/sdk2/snippets-routes')(app);
 require('./lib/sitemap')(app);
 
 
+/**
+ * Export `docsapp` or boot a new https server
+ * with it
+ */
 
 if (!module.parent) {
   var server;

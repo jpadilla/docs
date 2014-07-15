@@ -23,7 +23,7 @@ Hello@@account.userName ? ' ' + account.userName : ''@@! Ready to test drive Aut
       var tutorial = new TutorialNavigator();
       var eqlPath = function(url) {
         var base = page.base() || '';
-        var path = window.location.hash || '#!/';
+        var path = window.location.pathname.slice(base.length) || '/';
         return path === url;
       }
 
@@ -32,18 +32,17 @@ Hello@@account.userName ? ' ' + account.userName : ''@@! Ready to test drive Aut
        */
 
       page('*', rewrite);
-      page('/:apptype?', checkstate, render);
-      page('/:apptype/:platform?', checkstate, render);
-      page('/:apptype/:platform/:api?', checkstate, render);
+      page('/quickstart/:apptype?', checkstate, render);
+      page('/quickstart/:apptype/:platform?', checkstate, render);
+      page('/quickstart/:apptype/:platform/:api?', checkstate, render);
 
       // Initialize routing
-      page.base('/');
+      // page.base('/quickstart');
       page();
 
       function rewrite(ctx, next) {
-          if (ctx.pathname !== '/' && !ctx.hash) return next();
-          ctx.path = ctx.hash.replace(/^[\#\!]/, '')
-          next();
+        if(!/^\/quickstart/.test(ctx.path)) ctx.path = '/quickstart' + ctx.path;
+        next();
       }
 
       function checkstate(ctx, next) {
@@ -82,12 +81,12 @@ Hello@@account.userName ? ' ' + account.userName : ''@@! Ready to test drive Aut
       tutorial.on('codevisible', oncodevisible);
 
       function onapptype(val, old) {
-        var url = '#!/:apptype'.replace(':apptype', val || '')
+        var url = '/quickstart/:apptype'.replace(':apptype', val || '')
         if (!eqlPath(url)) return page(url);
       }
 
       function onplatform(val, old) {
-        var url = '#!/:apptype/:platform';
+        var url = '/quickstart/:apptype/:platform';
         var apptype = tutorial.get('apptype');
         var platform = val ? val : '';
 
@@ -111,7 +110,7 @@ Hello@@account.userName ? ' ' + account.userName : ''@@! Ready to test drive Aut
         if (!platform) return;
         if (old && !api) return;
 
-        var url = '#!/:apptype/:platform/:api'
+        var url = '/quickstart/:apptype/:platform/:api'
           .replace(':apptype', apptype)
           .replace(':platform', platform)
           .replace(':api', api ? api : 'no-api')
@@ -133,7 +132,7 @@ Hello@@account.userName ? ' ' + account.userName : ''@@! Ready to test drive Aut
         if (!platform) return;
         if (old && !visible) return;
 
-        var url = '#!/:apptype/:platform/:api'
+        var url = '/quickstart/:apptype/:platform/:api'
           .replace(':apptype', apptype)
           .replace(':platform', platform)
           .replace(':api', api
